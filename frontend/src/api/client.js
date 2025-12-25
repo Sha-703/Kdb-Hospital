@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Use REACT_APP_API_URL when set (embedded at build time by CRA).
+// If not set, fall back to relative URLs so local `proxy` in development works.
+const apiBase = (process.env.REACT_APP_API_URL || '').replace(/\/+$/, '');
 const client = axios.create({
-  baseURL: '/',
+  baseURL: apiBase || '/',
   headers: { 'Content-Type': 'application/json' },
 });
 

@@ -5,7 +5,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET', 'dev-secret')
 # Enable DEBUG by default for local development; in production set DJANGO_DEBUG='False'
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS: read from env (comma-separated).
+# In development default to '*' for convenience; in production default to the backend's Render URL.
+raw_allowed = os.environ.get('ALLOWED_HOSTS', '')
+if raw_allowed:
+    ALLOWED_HOSTS = [h.strip() for h in raw_allowed.split(',') if h.strip()]
+else:
+    # sensible defaults: permissive in DEBUG, restrictive in production
+    ALLOWED_HOSTS = ['*'] if DEBUG else ['kdb-hospital.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -84,8 +91,24 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS for local dev
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS configuration
+# By default during development (DEBUG=True) allow all origins for convenience.
+# In production, set `CORS_ALLOW_ALL_ORIGINS=false` and provide
+# `CORS_ALLOWED_ORIGINS` as a comma-separated list (e.g. https://app.example.com)
+CORS_ALLOW_ALL_ORIGINS = os.environ.get(
+    'CORS_ALLOW_ALL_ORIGINS',
+    'True' if DEBUG else 'False'
+).lower() in ('1', 'true', 'yes')
+
+# Optional explicit allowed origins (comma-separated). If not provided in production,
+# default to the known frontend Render URL so only the deployed frontend is allowed.
+raw_cors_allowed = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if raw_cors_allowed:
+    CORS_ALLOWED_ORIGINS = [u.strip() for u in raw_cors_allowed.split(',') if u.strip()]
+else:
+    CORS_ALLOWED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
+
+# If CORS_ALLOW_ALL_ORIGINS is True, django-cors-headers will allow all origins.
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
@@ -97,6 +120,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
+# CSRF trusted origins: allow the frontend host for cross-site POSTs when in production.
+raw_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+if raw_csrf:
+    CSRF_TRUSTED_ORIGINS = [u.strip() for u in raw_csrf.split(',') if u.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
 
 # Simple JWT default settings (tweaks can be adjusted for prod)
 from datetime import timedelta
