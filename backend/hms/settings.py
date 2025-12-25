@@ -4,7 +4,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET', 'dev-secret')
 # Enable DEBUG by default for local development; in production set DJANGO_DEBUG='False'
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
 # ALLOWED_HOSTS: read from env (comma-separated).
 # In development default to '*' for convenience; in production default to the backend's Render URL.
 raw_allowed = os.environ.get('ALLOWED_HOSTS', '')
