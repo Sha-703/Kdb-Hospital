@@ -1,10 +1,23 @@
 import axios from 'axios';
 
-// Use REACT_APP_API_URL when set (embedded at build time by CRA).
-// If not set, fall back to relative URLs so local `proxy` in development works.
-const apiBase = (process.env.REACT_APP_API_URL || '').replace(/\/+$/, '');
+// Resolve API base URL in this order:
+// 1. runtime override `window.__API_BASE_URL` (can be injected in index.html by host)
+// 2. build-time `process.env.REACT_APP_API_URL` (CRA)
+// 3. fallback to relative '/' so CRA dev proxy works locally
+function resolveApiBase() {
+  try {
+    const runtime = (typeof window !== 'undefined' && window.__API_BASE_URL) ? String(window.__API_BASE_URL) : '';
+    if (runtime) return runtime.replace(/\/+$/, '');
+  } catch (e) {
+    // ignore
+  }
+  const build = (process.env.REACT_APP_API_URL || '');
+  if (build) return build.replace(/\/+$/, '');
+  return '/';
+}
+
 const client = axios.create({
-  baseURL: apiBase || '/',
+  baseURL: resolveApiBase(),
   headers: { 'Content-Type': 'application/json' },
 });
 

@@ -38,7 +38,7 @@ export default function Header() {
   function handleLogout(){
     logout();
     nav('/login');
-    window.location.reload();
+    // Do not force a full page reload; client-side routing will handle state.
   }
 
   // hide header on login page (root or /login)
