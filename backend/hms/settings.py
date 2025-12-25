@@ -30,6 +30,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -88,7 +89,13 @@ STATIC_URL = '/static/'
 # Where `collectstatic` will gather files for production deployments
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Optional extra static dirs (project-level static files)
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# Only include the project-level `static` dir if it actually exists to avoid
+# staticfiles warnings when the folder is not present in the container.
+_project_static = BASE_DIR / 'static'
+if _project_static.exists():
+    STATICFILES_DIRS = [_project_static]
+else:
+    STATICFILES_DIRS = []
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS configuration
@@ -127,6 +134,13 @@ if raw_csrf:
     CSRF_TRUSTED_ORIGINS = [u.strip() for u in raw_csrf.split(',') if u.strip()]
 else:
     CSRF_TRUSTED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
+
+# When running with DEBUG=False ensure static files are served by the WSGI app
+# (e.g. Gunicorn). WhiteNoise provides a simple way to serve collected static
+# files directly from the Django app. Ensure `whitenoise` is installed in
+# production and set an optimized storage backend.
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Simple JWT default settings (tweaks can be adjusted for prod)
 from datetime import timedelta
