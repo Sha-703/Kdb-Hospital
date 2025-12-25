@@ -18,8 +18,9 @@ const Login: React.FC = () => {
     try{
       await login(username, password);
       if (tenant) localStorage.setItem('tenant_slug', tenant);
+      // Navigate to dashboard without forcing a full page reload so the
+      // client-side router handles the route (avoids 404 on static hosts).
       nav('/dashboard');
-      window.location.reload();
     }catch(err){
       // show backend error detail when available
       console.error('Login error', err);
