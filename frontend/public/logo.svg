@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Kdb Hopital logo">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0ea5a0"/>
+      <stop offset="1" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" rx="48" ry="48" fill="url(#g)" />
+  <g transform="translate(64,64) scale(0.625)">
+    <!-- White rounded square background for the cross -->
+    <rect x="40" y="40" width="272" height="272" rx="40" fill="white" opacity="0.06" />
+
+    <!-- Medical cross -->
+    <rect x="140" y="76" width="92" height="220" rx="12" fill="white" />
+    <rect x="76" y="140" width="220" height="92" rx="12" fill="white" />
+
+    <!-- Circle emblem behind cross -->
+    <circle cx="186" cy="186" r="130" fill="none" stroke="white" stroke-width="14" opacity="0.12" />
+
+    <!-- Kdb text -->
+    <g transform="translate(0,320)">
+      <text x="0" y="0" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="84" fill="white" font-weight="700">Kdb</text>
+      <text x="220" y="10" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="42" fill="white" opacity="0.95">Hopital</text>
+    </g>
+  </g>
+</svg>
