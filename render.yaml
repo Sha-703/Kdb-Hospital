@@ -1,0 +1,8 @@
+services:
+  - type: static
+    name: hms-frontend
+    env: static
+    root: frontend
+    plan: free
+    buildCommand: "npm ci && npm run build"
+    publishPath: build

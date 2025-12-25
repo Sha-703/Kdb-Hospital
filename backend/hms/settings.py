@@ -3,7 +3,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET', 'dev-secret')
-# Enable DEBUG by default for local development; in production set DJANGO_DEBUG='False'
+
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
 # ALLOWED_HOSTS: read from env (comma-separated).
 # In development default to '*' for convenience; in production default to the backend's Render URL.
@@ -30,13 +30,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'middleware.debug_guard.DebugGuardMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # Tenant middleware must run after AuthenticationMiddleware so we can
-    # fallback to the authenticated user's Staff.tenant when header is absent.
     'middleware.tenant_middleware.TenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -88,9 +87,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # Where `collectstatic` will gather files for production deployments
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# Optional extra static dirs (project-level static files)
-# Only include the project-level `static` dir if it actually exists to avoid
-# staticfiles warnings when the folder is not present in the container.
 _project_static = BASE_DIR / 'static'
 if _project_static.exists():
     STATICFILES_DIRS = [_project_static]
@@ -99,29 +95,22 @@ else:
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS configuration
-# By default during development (DEBUG=True) allow all origins for convenience.
-# In production, set `CORS_ALLOW_ALL_ORIGINS=false` and provide
-# `CORS_ALLOWED_ORIGINS` as a comma-separated list (e.g. https://app.example.com)
 CORS_ALLOW_ALL_ORIGINS = os.environ.get(
     'CORS_ALLOW_ALL_ORIGINS',
     'True' if DEBUG else 'False'
 ).lower() in ('1', 'true', 'yes')
 
 # Optional explicit allowed origins (comma-separated). If not provided in production,
-# default to the known frontend Render URL so only the deployed frontend is allowed.
 raw_cors_allowed = os.environ.get('CORS_ALLOWED_ORIGINS', '')
 if raw_cors_allowed:
     CORS_ALLOWED_ORIGINS = [u.strip() for u in raw_cors_allowed.split(',') if u.strip()]
 else:
     CORS_ALLOWED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
 
-# If CORS_ALLOW_ALL_ORIGINS is True, django-cors-headers will allow all origins.
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 REST_FRAMEWORK = {
-    # For local development allow unauthenticated read-only access;
-    # production should use stricter defaults (IsAuthenticated).
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -135,10 +124,6 @@ if raw_csrf:
 else:
     CSRF_TRUSTED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
 
-# When running with DEBUG=False ensure static files are served by the WSGI app
-# (e.g. Gunicorn). WhiteNoise provides a simple way to serve collected static
-# files directly from the Django app. Ensure `whitenoise` is installed in
-# production and set an optimized storage backend.
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
