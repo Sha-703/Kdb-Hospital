@@ -107,6 +107,13 @@ if raw_cors_allowed:
 else:
     CORS_ALLOWED_ORIGINS = ['https://kdb-hospital-8e4t.onrender.com'] if not DEBUG else []
 
+# Allow custom headers used by the frontend (e.g. X-Tenant-Slug)
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-tenant-slug',
+    'X-Tenant-Slug',
+]
+
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
