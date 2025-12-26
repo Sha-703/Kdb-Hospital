@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import Patients from './pages/Patients';
 import Appointments from './pages/Appointments';
 import Login from './pages/Login';
@@ -17,7 +17,7 @@ import './styles.css';
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="app-root">
         <Header />
         <main className="app-main">
@@ -38,7 +38,7 @@ const App: React.FC = () => {
         </main>
         <Footer />
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
